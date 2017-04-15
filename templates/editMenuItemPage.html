@@ -1,0 +1,38 @@
+{% extends 'layout.html' %}
+
+{% block title %} Edit Menu Item of {{ restaurant.name }}'s Menu {% endblock %}
+
+{% block headerButtons %}
+	<a href="{{url_for('homepageRoute')}}">
+		<div class="headerButton">Home</div>
+	</a>
+{% endblock %}
+
+{% block body %}
+<h2>Edit Menu Item of {{ restaurant.name }}'s Menu</h2>
+<form method="post">
+	<label>
+		Item Name
+		<input type="text" value="{{item.name}}" name="name">
+	</label>
+	<br>
+	<label>
+		Item Price
+		<input type="text" value="{{item.price}}" name="price">
+	</label>
+	<br>
+	<label>
+		Item course
+		<input type="text" value="{{item.course}}" name="course">
+	</label>
+	<br>
+	<label>
+		Item Description
+		<textarea name="description">{{item.description}}</textarea>
+	</label>
+	<br><br><br>
+
+	<input type="submit" name="Edit Menu Item">
+	<a href="{{url_for('restaurantRoute', restaurant_id = restaurant.id)}}">Cancel</a>
+</form>
+{% endblock %}

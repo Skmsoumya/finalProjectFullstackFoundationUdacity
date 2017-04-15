@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Restaurants || {% block title %} {% endblock %}</title>
+
+		<link rel="stylesheet" type="text/css" href="{{url_for('static', filename='styles.css')}}">
+	</head>
+	<body>
+		<header class="default_primary_color">
+			<div class="headerButtonsHolder text_primary_color">
+			{% block headerButtons %}{% endblock %}
+		</header>
+		<div class="body">
+			{% block body %}{% endblock %}
+		</div>
+		<footer class="accent_color">
+			
+		</footer>
+	</body>
+</html>

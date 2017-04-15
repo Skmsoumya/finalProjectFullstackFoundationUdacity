@@ -1,0 +1,17 @@
+{% extends 'layout.html' %}
+
+{% block title %} Delete {{item.name}} from {{restaurant.name}} {% endblock %}
+
+{% block headerButtons %}
+	<a href="{{url_for('homepageRoute')}}">
+		<div class="headerButton">Home</div>
+	</a>
+{% endblock %}
+
+{% block body %}
+	<form method="post">
+		<h2>Are you sure you want to delete <strong>{{item.name}}</strong> from <strong>{{restaurant.name}}</strong></h2>
+		<input type="submit" value="Yes Delete">
+		<a href="{{url_for('restaurantRoute', restaurant_id = restaurant.id)}}">Cancel</a>
+	</form>
+{% endblock %}

@@ -1,0 +1,27 @@
+{% extends 'layout.html' %}
+
+{% block title %}Find Great Restaurants{% endblock %}
+
+{% block headerButtons %}
+	<a href="{{url_for('restaurantAddRoute')}}">
+		<div class="headerButton">Add Restaurant</div>
+	</a>
+{% endblock %}
+
+{% block body %}
+
+	<div class="home">
+		{% for restaurant in restaurants %}
+			<h2>{{restaurant.name}}</h2>
+			<p>{{restaurant.locality}} <br>
+				{{restaurant.description}}<br>
+				{{restaurant.id}}</p>
+			<a href="{{url_for('restaurantRoute', restaurant_id = restaurant.id)}}">Details</a>
+			<br>
+			<a href="{{url_for('restaurantEditRoute', restaurant_id = restaurant.id)}}">Edit</a>
+			<a href="{{ url_for('restaurantDeleteRoute', restaurant_id=restaurant.id) }}">Delete</a>
+			<br><br>
+		{% endfor %}
+	</div>
+
+{% endblock %}
