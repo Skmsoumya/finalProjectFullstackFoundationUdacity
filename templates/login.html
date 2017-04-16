@@ -1,0 +1,63 @@
+{% extends 'layout.html' %}
+
+{% block title %} Login To FoodoMenuo {% endblock %}
+
+{% block headers %}
+	<script src="https://apis.google.com/js/platform.js" async defer></script>
+
+	<script type="text/javascript">
+		function signInCallback(authResult) {
+			if (authResult["code"]) {
+				$("signInButton").hidden = true;
+
+				$.ajax({
+					type: "POST",
+					url: "gconnect?state={{state}}",
+					processData: false,
+					data: authResult["code"],
+					contentType: 'application/octet-stream; charset=utf-8',
+					success: function(response) {
+						if(response) {
+							$("#response").html("Login Successfull</br>" + result + "<br>Redirecting...");
+							setTimeout(function() {
+          						window.location.href = "/restaurant";
+         					}, 4000);
+						}
+						else if(authResult["error"]) {
+							console.log("There was an error!" + authResult["error"]);
+						}
+						else {
+							$("#response").html("Failed to make server side call! Check your internet connection!");
+						}
+					}
+				})
+
+			}
+		}
+	</script>
+{% endblock %}
+
+{% block headerButtons %}
+{% endblock %}
+
+{% block body %}
+	<div class="card">
+		<h2>Login Using:</h2>
+		<div id="signInButton">
+          	<span class="g-signin"
+        	    data-scope="openid email"
+        	    data-clientid="782771806612-7u84sa1hse9e4bau6gdae112ntpm557m.apps.googleusercontent.com"
+        	    data-redirecturi="postmessage"
+        	    data-accesstype="offline"
+        	    data-cookiepolicy="single_host_origin"
+        	    data-callback="signInCallback"
+        	    data-approvalprompt="force">
+        	</span>
+        </div>
+
+        <div id="response"></div>
+	</div>
+
+
+	
+{% endblock %}

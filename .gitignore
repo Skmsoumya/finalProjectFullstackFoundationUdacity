@@ -1,0 +1,4 @@
+*.sql
+*.db
+client_secret.json
+restaurantmenu.db-journal

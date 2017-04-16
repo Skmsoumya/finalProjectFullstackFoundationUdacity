@@ -3,9 +3,6 @@
 {% block title %} {{restaurant.name}}'s Details{% endblock %}
 
 {% block headerButtons %}
-	<a href="{{url_for('homepageRoute')}}">
-		<div class="headerButton">Home</div>
-	</a>
 	<a href="{{url_for('restaurantEditRoute', restaurant_id=restaurant.id)}}">
 		<div class="headerButton">Edit Restaurant</div>
 	</a>
@@ -31,8 +28,8 @@
 					<h3>{{item.name}}</h3>
 					<p>{{item.description}}</p>
 					<div>
-						<span>Price: ${{item.price}}</span>
-						<span>Course: {{ item.course }}</span>
+						<div><strong>Price:</strong> ${{item.price}}</div>
+						<div><strong>Course:</strong> {{ item.course }}</div>
 					</div>
 					<div class="floatRight">
 						<a href="{{url_for('menuItemEditRoute', restaurant_id=restaurant.id, menu_id=item.id )}}">
