@@ -16,30 +16,36 @@
 
 {% block body %}
 	<div class="home">
-		<h2>{{restaurant.name}}</h2>
+		<div style="float: right;">
+			<a href="{{url_for('menuItemAddRoute', restaurant_id=restaurant.id)}}">
+				<div class="button">Add New Item</div>
+			</a>
+		</div>
+		<h2 style="margin-bottom: 0px;">{{restaurant.name}}</h2>
 		<i>{{restaurant.locality}}</i>
-		<br>
 		<p>{{restaurant.description}}</p>
-
-		<hr>
 
 		<div class="menu">
 			{% for item in items %}
-				<div>
+				<div class="card">
 					<h3>{{item.name}}</h3>
 					<p>{{item.description}}</p>
 					<div>
 						<span>Price: ${{item.price}}</span>
 						<span>Course: {{ item.course }}</span>
 					</div>
-					<a href="{{url_for('menuItemEditRoute', restaurant_id=restaurant.id, menu_id=item.id )}}">Edit Item</a>
-					<a href="{{url_for('menuItemDeleteRoute', restaurant_id=restaurant.id, menu_id=item.id )}}">Delete Item</a>
+					<div class="floatRight">
+						<a href="{{url_for('menuItemEditRoute', restaurant_id=restaurant.id, menu_id=item.id )}}">
+							<div class="button">Edit Item</div>
+						</a>
+						<a href="{{url_for('menuItemDeleteRoute', restaurant_id=restaurant.id, menu_id=item.id )}}">
+							<div class="button">Delete Item</div>
+						</a>
+					</div>
 				</div>
 			{% endfor %}
 
-			<div>
-				<a href="{{url_for('menuItemAddRoute', restaurant_id=restaurant.id)}}">Add New Item</a>
-			</div>
+			
 		</div>
 	</div>
 {% endblock %}

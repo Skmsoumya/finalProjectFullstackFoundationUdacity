@@ -12,15 +12,23 @@
 
 	<div class="home">
 		{% for restaurant in restaurants %}
+		<a href="{{url_for('restaurantRoute', restaurant_id = restaurant.id)}}">
+		<div class="card">
 			<h2>{{restaurant.name}}</h2>
-			<p>{{restaurant.locality}} <br>
-				{{restaurant.description}}<br>
-				{{restaurant.id}}</p>
-			<a href="{{url_for('restaurantRoute', restaurant_id = restaurant.id)}}">Details</a>
+			<i>{{restaurant.locality}}</i>
 			<br>
-			<a href="{{url_for('restaurantEditRoute', restaurant_id = restaurant.id)}}">Edit</a>
-			<a href="{{ url_for('restaurantDeleteRoute', restaurant_id=restaurant.id) }}">Delete</a>
-			<br><br>
+			<br>
+			<p>{{restaurant.description}}</p>
+			<br>
+			<div class="floatRight">
+				<a href="{{url_for('restaurantEditRoute', restaurant_id = restaurant.id)}}">
+					<div class="button">Edit</div></a>
+				<a href="{{ url_for('restaurantDeleteRoute', restaurant_id=restaurant.id) }}">
+					<div class="button">Delete</div>
+				</a>
+			</div>
+		</div>
+		</a>
 		{% endfor %}
 	</div>
 

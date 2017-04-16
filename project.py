@@ -31,7 +31,10 @@ def restaurantAddRoute():
 								description = request.form["description"])
 		session.add(restaurant)
 		session.commit()
-		return redirect(url_for('homepageRoute'))
+		if("/api/json/" not in request.url):
+			return redirect(url_for('homepageRoute'))
+		else:
+			return jsonify(restaurant=restaurant.serialize)
 	return render_template("addRestaurant.html")
 
 
@@ -53,7 +56,11 @@ def restaurantEditRoute(restaurant_id):
 		restaurant.description = request.form["description"]
 		session.add(restaurant)
 		session.commit()
-		return redirect(url_for('restaurantRoute', restaurant_id = restaurant_id))
+		if("/api/json/" not in request.url):
+			return redirect(url_for('restaurantRoute', restaurant_id = restaurant_id))
+		else:
+			return jsonify(restaurant=restaurant.serialize)
+		
 	else:
 		restaurant = session.query(Restaurant).filter_by(id=restaurant_id).one()
 		return render_template("editRestaurantpage.html", restaurant=restaurant)
