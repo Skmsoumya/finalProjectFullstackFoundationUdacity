@@ -25,6 +25,14 @@ from sqlalchemy import create_engine
 # sqlalchemy will know that the classes relates to tables in database
 Base = declarative_base()
 
+class User(Base):
+	__tablename__ = "user"
+
+	name = Column(String(100), nullable = False)
+	email = Column(String(100), nullable = False)
+	picture = Column(String)
+	id = Column(Integer, primary_key = True)
+
 class Restaurant(Base):
 	__tablename__ = "restaurant"
 	# Mapper Code
@@ -32,6 +40,9 @@ class Restaurant(Base):
 	description = Column(String(250))
 	locality = Column(String(20))
 	id = Column( Integer, primary_key = True)
+
+	user_id = Column(Integer, ForeignKey("user.id"))
+	user = relationship(User)
 
 	@property
 	def serialize(self):
@@ -56,8 +67,10 @@ class MenuItem(Base):
 	price = Column(String(8))
 
 	restaurant_id = Column(Integer, ForeignKey("restaurant.id"))
-
 	restaurant = relationship(Restaurant)
+
+	user_id = Column(Integer, ForeignKey("user.id"))
+	user = relationship(User)
 
 	@property
 	def serialize(self):
@@ -69,5 +82,5 @@ class MenuItem(Base):
 			"id": self.id
 		}
 # will create a new file to connect to the db
-engine = create_engine("sqlite:///restaurantmenu.db")
+engine = create_engine("sqlite:///restaurantmenuwithusers.db")
 Base.metadata.create_all(engine)

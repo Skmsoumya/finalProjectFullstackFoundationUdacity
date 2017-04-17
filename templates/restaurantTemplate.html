@@ -3,12 +3,14 @@
 {% block title %} {{restaurant.name}}'s Details{% endblock %}
 
 {% block headerButtons %}
+	{% if user_id == restaurant.user_id %}
 	<a href="{{url_for('restaurantEditRoute', restaurant_id=restaurant.id)}}">
 		<div class="headerButton">Edit Restaurant</div>
 	</a>
 	<a href="{{url_for('restaurantDeleteRoute', restaurant_id=restaurant.id)}}">
 		<div class="headerButton">Delete Restaurant</div>
 	</a>
+	{% endif %}
 {% endblock %}
 
 {% block body %}
@@ -31,6 +33,7 @@
 						<div><strong>Price:</strong> ${{item.price}}</div>
 						<div><strong>Course:</strong> {{ item.course }}</div>
 					</div>
+				{% if user_id == item.user_id %}
 					<div class="floatRight">
 						<a href="{{url_for('menuItemEditRoute', restaurant_id=restaurant.id, menu_id=item.id )}}">
 							<div class="button">Edit Item</div>
@@ -39,6 +42,7 @@
 							<div class="button">Delete Item</div>
 						</a>
 					</div>
+				{% endif %}
 				</div>
 			{% endfor %}
 

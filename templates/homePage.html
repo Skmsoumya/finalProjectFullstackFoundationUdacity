@@ -20,6 +20,7 @@
 			<br>
 			<p>{{restaurant.description}}</p>
 			<br>
+			{% if user_id == restaurant.user_id %}
 			<div class="floatRight">
 				<a href="{{url_for('restaurantEditRoute', restaurant_id = restaurant.id)}}">
 					<div class="button">Edit</div></a>
@@ -27,6 +28,7 @@
 					<div class="button">Delete</div>
 				</a>
 			</div>
+			{% endif %}
 		</div>
 		</a>
 		{% endfor %}

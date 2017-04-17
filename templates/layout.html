@@ -13,6 +13,16 @@
 				<div class="logo">FoodoMenuo</div>
 			</a>
 			<div class="headerButtonsHolder text_primary_color">
+				{% if not user_id %}
+				<a href="{{url_for('showLogin')}}">
+					<div class="headerButton">Login</div>
+				</a>
+				{% endif %}
+				{% if user_id%}
+					<a href="{{url_for('gdisconnect')}}">
+						<div class="headerButton">Logout</div>
+					</a>
+				{% endif %}
 				{% block headerButtons %}{% endblock %}
 			</div>
 		</header>
