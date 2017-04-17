@@ -34,6 +34,33 @@
 
 			}
 		}
+
+		function sendTokenToServer() {
+			var access_token = FB.getAuthResponse()["accessToken"];
+			console.log("Fetching your access token...");
+			console.log(access_token);
+			$.ajax({
+				type: "POST",
+				url: "/fbconnect?state={{state}}",
+				processData: false,
+				data: access_token,
+				contentType: "application/octet-stream; charset=utf-8",
+				success: function(result) {
+					if(result) {
+						$("#result").html("Login Successfull!<br>" + result + "<br> Redirecting..." );
+						setTimeout(function() {
+          					window.location.href = "/restaurants";
+         				}, 4000);
+					}
+					else if(authResult["error"]) {
+						console.log("There was an error!" + result["error"]);
+					}
+					else {
+						$("#response").html("Failed to make server side call! Check your internet connection!");
+					}
+				}
+			})
+		}
 	</script>
 {% endblock %}
 
@@ -41,6 +68,26 @@
 {% endblock %}
 
 {% block body %}
+	<script>
+	  	window.fbAsyncInit = function() {
+	   		FB.init({
+	   		  	appId      : '1684286661584652',
+	   		  	cookie     : true,
+	   		  	xfbml      : true,
+	   		  	version    : 'v2.8'
+	   		});
+	   		FB.AppEvents.logPageView();   
+	  	};
+	
+	  	(function(d, s, id){
+	     	var js, fjs = d.getElementsByTagName(s)[0];
+	     	if (d.getElementById(id)) {return;}
+	     	js = d.createElement(s); js.id = id;
+	     	js.src = "//connect.facebook.net/en_US/sdk.js";
+	     	fjs.parentNode.insertBefore(js, fjs);
+	   	}(document, 'script', 'facebook-jssdk'));
+	</script>
+
 	<div class="card">
 		<h2>Login Using:</h2>
 		<div id="signInButton">
@@ -55,6 +102,11 @@
         	</span>
         </div>
 
+        <!-- <button class="btn btn-default" id="new-menu-item">
+        	<span class="glyphicon glyphicon-glass" aria-hidden="true"></span> Login With Facebook
+        	<a href="javascript:sendTokenToServer();">Login With Facebook</a>
+        </button> -->
+        <fb:login-button scope="public_profile,email" onlogin="sendTokenToServer();"></fb:login-button>
         <div id="response"></div>
 	</div>
 
