@@ -2,8 +2,8 @@ from flask import Flask, render_template, redirect, url_for, request, jsonify, f
 from flask import session as login_session
 import string, random
 
-from oauth2client.client import flow_from_clientsecrets
-from oauth2client.client import FlowExchangeError
+from oauth2client.client import flow_from_clientsecrets, OAuth2WebServerFlow
+from oauth2client.client import FlowExchangeError, Credentials
 import httplib2
 import json
 from flask import make_response
@@ -34,6 +34,8 @@ def homepageRoute():
 @app.route("/api/json/restaurants/add_restaurant", methods=["GET", "POST"])
 @app.route("/restaurants/add_restaurant", methods=["GET", "POST"])
 def restaurantAddRoute():
+	if("user_name" not in login_session):
+		return redirect(url_for(showLogin))
 	if(request.method == "POST"):
 		restaurant = Restaurant(name = request.form["name"], 
 								locality = request.form["location"],
@@ -58,6 +60,8 @@ def restaurantRoute(restaurant_id):
 @app.route("/api/json/restaurants/<int:restaurant_id>/edit/", methods=["GET", "POST"])
 @app.route("/restaurants/<int:restaurant_id>/edit/", methods=["GET", "POST"])
 def restaurantEditRoute(restaurant_id):
+	if("user_name" not in login_session):
+		return redirect(url_for(showLogin))
 	if(request.method == "POST"):
 		restaurant = session.query(Restaurant).filter_by(id = restaurant_id).one()
 		restaurant.name = request.form["name"]
@@ -77,6 +81,8 @@ def restaurantEditRoute(restaurant_id):
 @app.route("/api/json/restaurants/<int:restaurant_id>/delete/", methods=["GET", "POST"])
 @app.route("/restaurants/<int:restaurant_id>/delete/", methods=["GET", "POST"])
 def restaurantDeleteRoute(restaurant_id):
+	if("user_name" not in login_session):
+		return redirect(url_for(showLogin))
 	restaurant = session.query(Restaurant).filter_by(id = restaurant_id).one()
 	if(request.method == "POST"):
 		session.delete(restaurant)
@@ -88,6 +94,8 @@ def restaurantDeleteRoute(restaurant_id):
 @app.route("/api/json/restaurants/<int:restaurant_id>/menu/<int:menu_id>/edit/", methods=["GET", "POST"])
 @app.route("/restaurants/<int:restaurant_id>/menu/<int:menu_id>/edit/", methods=["GET", "POST"])
 def menuItemEditRoute(restaurant_id, menu_id):
+	if("user_name" not in login_session):
+		return redirect(url_for(showLogin))
 	restaurant = session.query(Restaurant).filter_by(id = restaurant_id).one()
 	item = session.query(MenuItem).filter_by(id = menu_id, restaurant_id = restaurant_id).one()
 	if(request.method == "POST"):
@@ -104,6 +112,9 @@ def menuItemEditRoute(restaurant_id, menu_id):
 @app.route("/api/json/restaurants/<int:restaurant_id>/menu/<int:menu_id>/delete/", methods=["GET", "POST"])
 @app.route("/restaurants/<int:restaurant_id>/menu/<int:menu_id>/delete/", methods=["GET", "POST"])
 def menuItemDeleteRoute(restaurant_id, menu_id):
+	if("user_name" not in login_session):
+		return redirect(url_for(showLogin))
+
 	restaurant = session.query(Restaurant).filter_by(id = restaurant_id).one()
 	item = session.query(MenuItem).filter_by(id = menu_id, restaurant_id = restaurant_id).one()
 	if(request.method == "POST"):
@@ -116,6 +127,9 @@ def menuItemDeleteRoute(restaurant_id, menu_id):
 @app.route("/api/json/restaurants/<int:restaurant_id>/menu/new_item", methods=["GET", "POST"])
 @app.route("/restaurants/<int:restaurant_id>/menu/new_item", methods=["GET", "POST"])
 def menuItemAddRoute(restaurant_id):
+	if("user_name" not in login_session):
+		return redirect(url_for(showLogin))
+
 	restaurant = session.query(Restaurant).filter_by(id= restaurant_id).one()
 	if(request.method == "POST"):
 		newItem = MenuItem(	name = request.form["name"],
@@ -165,57 +179,94 @@ def gconnect():
 	code = request.data
 	try:
 		#Upgrade authorization code to a credentials object
-		oauth_flow = flow_from_clientsecrets("client_secret.json", scope="")
+		oauth_flow = OAuth2WebServerFlow(	client_id='782771806612-7u84sa1hse9e4bau6gdae112ntpm557m.apps.googleusercontent.com',
+                           					client_secret='kEpPfrDXJgaHVl7wPj71WIas',
+                           					scope='',
+                           					redirect_uri='postmessage')
 		oauth_flow.redirect_url = "postmessage"
 		credentials = oauth_flow.step2_exchange(code)
 	except FlowExchangeError:
+		print FlowExchangeError.error
 		response = make_response(json.dumps("Failed to convert authorization code to credentials!"), 401)
 		response.headers["Content-Type"] = "application/json"
 		return response
 
 	access_token = credentials.access_token
-	url = ("https://googleapis.com/oauth2/v1/tokeninfo?access_token=%s" % access_token)
-	h = httplib2.Http()
+	url = ("https://www.googleapis.com/oauth2/v3/tokeninfo?access_token=%s" % access_token)
+	h = httplib2.Http(disable_ssl_certificate_validation=True)
 	result = json.loads(h.request(url, "GET")[1])
-
 	#If error in access token info abort
-	if result["error"] is not None:
+	if "error" in result and result["error"] is not None:
 		response = make_response(json.dumps(result.get("error")), 500)
 		response.headers["Content-Type"] = "application/json"
 		return response
 	#Verify that the access token is for correct user
 	gplus_id = credentials.id_token["sub"]
-	if result["issued_to"] == gplus_id:
+	if result["sub"] != gplus_id:
 		response = make_response(json.dumps("Tokens Client Id doesn't matches apps"), 401)
 		print "Tokens Client Id doesn't matches apps"
 		response.headers["Content-Type"] = "application/json"
 		return response
 
 	# Check to see if user already logged in
-	stored_credentials = login_session.get("credentials")
+	stored_credentials = login_session.get("credentials") and Credentials.from_json(login_session.get("credentials"))
 	stored_gplus_id = login_session.get("gplus_id")
 	if(stored_credentials is not None and gplus_id == stored_gplus_id):
-		response = make_response(json.dump("Current user is already logged in!"), 200)
+		response = make_response(json.dumps("Current user is already logged in!"), 200)
 		response.headers["Content-Type"] = "application/json"
 
 	# store the user credentials and user id in the current session
-	login_session["credentials"] = credentials
+	login_session["credentials"] = credentials.to_json()
 	login_session["gplus_id"] = gplus_id
 
 
 	#Get user info
-	user_info_url = "http://www.googleapis.com/oauth2/v1/userinfo"
+	user_info_url = "https://www.googleapis.com/oauth2/v1/userinfo"
 	params = {"access_token": credentials.access_token, "alt": "json"}
 	answer = requests.get(user_info_url, params = params)
 	data = json.loads(answer.text)
-
 	login_session["user_name"] = data["name"]
 	login_session["picture"] = data["picture"]
 	login_session["email"] = data["email"]
 	flash("You are now logged in as %s" % login_session["user_name"])
-	return redirect(url_for("homepageRoute"))
+	output = ''
+	output += '<h1>Welcome, '
+	output += login_session['user_name']
+	output += '!</h1>'
+	output += '<img src="'
+	output += login_session['picture']
+	output += ' " style = "width: 300px; height: 300px;border-radius: 150px;-webkit-border-radius: 150px;-moz-border-radius: 150px;"> '
+	print "done!"
+	return json.dumps(output)
 
 
+#Revoke the user from the app
+@app.route("/gdisconnect")
+def gdisconnect():
+	credentials = login_session.get("credentials") and Credentials.new_from_json(login_session.get("credentials"))
+	if credentials is None:
+		response = make_response(json.dumps("User is not logged in to the app!"), 401)
+		response.headers["Content-Type"] = "application/json"
+		return response
+	access_token = credentials.access_token
+	url = "https://accounts.google.com/o/oauth2/revoke?token=%s" % access_token
+	h = httplib2.Http()
+	result = h.request(url, "GET")[0]
+
+	if result["status"] == "200":
+		del login_session["credentials"]
+		del login_session["gplus_id"]
+		del login_session["user_name"]
+		del login_session["picture"]
+		del login_session["email"]
+
+		response = make_response(json.dumps("user logged out sucessfully!"), 200)
+		response.headers["Content-Type"] = "application/json"
+		return response
+	else:
+		response = make_response(json.dumps("Failed to logout user!"), 401)
+		response.headers["Content-Type"] = "application/json"
+		return response
 @app.after_request
 def afterRequest(response):
 	response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"

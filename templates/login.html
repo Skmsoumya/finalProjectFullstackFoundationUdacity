@@ -3,7 +3,7 @@
 {% block title %} Login To FoodoMenuo {% endblock %}
 
 {% block headers %}
-	<script src="https://apis.google.com/js/platform.js" async defer></script>
+	<script src="//apis.google.com/js/platform.js?onload=start"> </script>
 
 	<script type="text/javascript">
 		function signInCallback(authResult) {
@@ -18,9 +18,9 @@
 					contentType: 'application/octet-stream; charset=utf-8',
 					success: function(response) {
 						if(response) {
-							$("#response").html("Login Successfull</br>" + result + "<br>Redirecting...");
+							$("#response").html("Login Successfull</br>" + response + "<br>Redirecting...");
 							setTimeout(function() {
-          						window.location.href = "/restaurant";
+          						window.location.href = "/restaurants";
          					}, 4000);
 						}
 						else if(authResult["error"]) {
